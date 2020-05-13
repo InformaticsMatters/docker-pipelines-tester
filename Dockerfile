@@ -1,5 +1,8 @@
 # A container image for the pipeline tester.
-# An image with docker, Java and Groovy.
+#
+# An image with Python, Docker, Java and Groovy
+# that can be used asa base image to test our pipelines
+# in a CI environment like GitLab-CI.
 
 FROM python:3.8.2
 
@@ -40,6 +43,18 @@ RUN apt-get update && \
 
 RUN curl -s "https://get.sdkman.io" | bash && \
     bash -l -c 'sdk install groovy'
+
+# Caution: Not all the enviornment variables you see
+#          when running the image outside of GitLab-CI are
+#          present when running inside GitLab-CI.
+#          Specifically everything added by SDK is lost
+#          (as I suspect it puts things in .bashrc etc.).
+#          So we need to be explicit about its key variables,
+#          like Groovy home and PATH modifications...
+
+ENV SDKMAN_DIR=$HOME/.sdkman
+ENV GROOVY_HOME=$SDKMAN_DIR/candidates/groovy/current
+ENV PATH=$PATH:$GROOVY_HOME/bin
 
 # -----------------------------------------------------------------------------
 
